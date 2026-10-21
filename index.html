@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.R.V.I.S AI System</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --cyan: #00eaff;
+            --blue: #008cff;
+            --bg: #020711;
+            --panel: rgba(0, 24, 43, .7);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(ellipse at center, #09243b 0%, #030b17 48%, #010309 100%);
+            color: var(--cyan);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: repeating-linear-gradient(transparent 0px, transparent 3px,
+                    rgba(0, 234, 255, .025) 4px);
+            z-index: 5;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 5%;
+            border-bottom: 1px solid #07506a;
+            background: rgba(0, 10, 24, .7);
+        }
+
+        .logo {
+            font: 800 24px 'Orbitron', sans-serif;
+            letter-spacing: 5px;
+            text-shadow: 0 0 18px var(--cyan);
+        }
+
+        .status {
+            font-size: 12px;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff354f;
+            margin-right: 8px;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .online .dot {
+            background: #00ff9d;
+        }
+
+        main {
+            width: min(1200px, 94%);
+            margin: auto;
+        }
+
+        .top-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 22px 0 0;
+            font-size: 12px;
+            color: #61a8c9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 24px;
+            align-items: center;
+            min-height: 490px;
+        }
+
+        .center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hud {
+            position: relative;
+            width: min(330px, 75vw);
+            aspect-ratio: 1;
+            display: grid;
+            place-items: center;
+            margin: 20px 0;
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid var(--cyan);
+            box-shadow: 0 0 12px #00cfff55, inset 0 0 12px #00cfff22;
+        }
+
+        .r1 {
+            inset: 1%;
+            border-style: dashed;
+            animation: spin 24s linear infinite;
+        }
+
+        .r2 {
+            inset: 10%;
+            border-width: 3px;
+            border-color: transparent var(--cyan) var(--cyan) transparent;
+            animation: spin 8s linear infinite;
+        }
+
+        .r3 {
+            inset: 19%;
+            border-style: dotted;
+            animation: spin 15s linear infinite reverse;
+        }
+
+        .r4 {
+            inset: 28%;
+            border-width: 2px;
+            border-color: var(--blue);
+            animation: spin 5s linear infinite;
+        }
+
+        .core {
+            width: 37%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle, #1b8caf 0%, #06415e 42%, #021323 75%);
+            border: 2px solid #a4f8ff;
+            box-shadow: 0 0 20px var(--cyan), 0 0 65px #008cff77,
+                inset 0 0 25px #00eaff88;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .core span {
+            font: 800 clamp(22px, 4vw, 38px) 'Orbitron', sans-serif;
+            color: white;
+            text-shadow: 0 0 15px var(--cyan);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            50% {
+                box-shadow: 0 0 35px var(--cyan), 0 0 90px #008cff99;
+            }
+        }
+
+        h1 {
+            font: 600 20px 'Orbitron', sans-serif;
+            letter-spacing: 4px;
+            margin: 8px 0;
+        }
+
+        .subtitle {
+            color: #568da8;
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid #08718e;
+            padding: 18px;
+            box-shadow: 0 0 20px #0077ff0c;
+        }
+
+        .panel h3 {
+            font: 600 13px 'Orbitron', sans-serif;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #14506a;
+            margin-top: 0;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 17px 0;
+            font-size: 12px;
+        }
+
+        .value {
+            color: white;
+        }
+
+        .bar {
+            height: 3px;
+            background: #12344a;
+            margin-top: 7px;
+        }
+
+        .bar span {
+            display: block;
+            height: 100%;
+            width: 78%;
+            background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        .terminal {
+            margin: 10px 0 28px;
+            padding: 18px;
+            background: rgba(0, 10, 22, .85);
+            border: 1px solid #07516c;
+        }
+
+        .terminal-title {
+            font: 600 12px 'Orbitron', sans-serif;
+            margin-bottom: 12px;
+        }
+
+        #log {
+            height: 105px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #91dfff;
+            white-space: pre-wrap;
+        }
+
+        .command {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            background: #04111e;
+            color: var(--cyan);
+            border: 1px solid #08617e;
+            padding: 13px;
+            outline: none;
+            font: 14px 'Share Tech Mono', monospace;
+        }
+
+        input:focus {
+            border-color: var(--cyan);
+        }
+
+        button {
+            cursor: pointer;
+            padding: 12px 17px;
+            color: var(--cyan);
+            background: #06243a;
+            border: 1px solid var(--cyan);
+            font: 12px 'Orbitron', sans-serif;
+            transition: .2s;
+        }
+
+        button:hover {
+            color: #001018;
+            background: var(--cyan);
+            box-shadow: 0 0 18px #00eaff77;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        footer {
+            text-align: center;
+            color: #315d73;
+            font-size: 10px;
+            letter-spacing: 2px;
+            padding: 0 10px 22px;
+        }
+
+        @media (max-width: 700px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding-bottom: 25px;
+            }
+
+            .panel {
+                width: 100%;
+            }
+
+            .top-info {
+                font-size: 10px;
+            }
+
+            header {
+                padding: 18px 4%;
+            }
+
+            .logo {
+                font-size: 19px;
+            }
+
+            .command {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">J.A.R.V.I.S</div>
+        <div class="status" id="status">
+            <span class="dot"></span>SYSTEM OFFLINE
+        </div>
+    </header>
+
+    <main>
+        <div class="top-info">
+            <span>STARK INDUSTRIES // AI CORE</span>
+            <span id="clock">00:00:00</span>
+        </div>
+
+        <section class="dashboard">
+            <div class="center">
+                <div class="hud">
+                    <div class="ring r1"></div>
+                    <div class="ring r2"></div>
+                    <div class="ring r3"></div>
+                    <div class="ring r4"></div>
+                    <div class="core"><span>AI</span></div>
+                </div>
+                <h1>JARVIS INTERFACE</h1>
+                <div class="subtitle">ARTIFICIAL INTELLIGENCE SYSTEM</div>
+            </div>
+
+            <aside class="panel">
+                <h3>SYSTEM MONITOR</h3>
+
+                <div class="metric">
+                    <span>AI CORE</span><span class="value" id="coreStatus">STANDBY</span>
+                </div>
+                <div class="metric">
+                    <span>INTERFACE</span><span class="value">ACTIVE</span>
+                </div>
+                <div class="metric">
+                    <span>VOICE MODULE</span><span class="value" id="voiceStatus">READY</span>
+                </div>
+
+                <div class="metric">
+                    <span>POWER LEVEL</span><span class="value">78%</span>
+                </div>
+                <div class="metric">
+                    <span>STOPWATCH</span><span class="value" id="stopwatchDisplay">00:00.0</span>
+                </div>
+                <div class="bar"><span></span></div>
+
+                <div class="controls">
+                    <button onclick="toggleSystem()" id="powerBtn">POWER ON</button>
+                    <button id="stopwatchBtn" onclick="toggleStopwatch()">START STOPWATCH</button>
+                    <button onclick="clearLog()">CLEAR LOG</button>
+                </div>
+            </aside>
+        </section>
+
+        <section class="terminal">
+            <div class="terminal-title">⌘ COMMAND TERMINAL</div>
+            <div id="log">JARVIS: Interface initialized.
+                JARVIS: Awaiting user command...</div>
+
+            <div class="command">
+                <input id="cmd" placeholder="Enter command..." autocomplete="off">
+                <button onclick="executeCommand()">EXECUTE</button>
+                <button onclick="listen()">🎙 VOICE</button>
+                <button onclick="startRockPaperScissors()">เป่ายิงฉุบ</button>
+                <button onclick="randomMenu()">สุ่มเมนูอาหาร</button>
+                <button onclick="randomJoke()">สุ่มมุกตลก</button>
+                <button onclick="randomFlirt()">มุกจีบสาว</button>
+                <button onclick="jarvisInsult()">คำด่า</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>J.A.R.V.I.S // PERSONAL ASSISTANT INTERFACE // V1.0</footer>
+
+    <script>
+        "use strict";
+
+        let active = false;
+        let recognition = null;
+        let timerId = null;
+        let timerEnd = 0;
+        let timerRemaining = 0;
+        let waitingForRpsChoice = false;
+        let stopwatchStartTime = 0;
+        let stopwatchElapsed = 0;
+        let stopwatchIntervalId = null;
+
+        const $ = id => document.getElementById(id);
+        const log = $("log");
+
+        const initialLog = [
+            "JARVIS: Interface initialized.",
+            "JARVIS: Awaiting user command..."
+        ];
+
+        function writeLog(message) {
+            const line = document.createTextNode("\n" + message);
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+
+            // Keep the latest 100 lines.
+            const lines = log.textContent.split("\n");
+            if (lines.length > 100) {
+                log.textContent = lines.slice(-100).join("\n");
+            }
+
+            try {
+                localStorage.setItem("jarvis-log", log.textContent);
+            } catch (_) { }
+        }
+
+        function respond(message, speak = true) {
+            writeLog("JARVIS: " + message);
+
+            if (speak && active && "speechSynthesis" in window) {
+                speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.lang = /[\u0E00-\u0E7F]/.test(message)
+                    ? "th-TH"
+                    : "en-US";
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleSystem() {
+            active = !active;
+
+            $("status").classList.toggle("online", active);
+            $("status").innerHTML =
+                '<span class="dot"></span>' +
+                (active ? "SYSTEM ONLINE" : "SYSTEM OFFLINE");
+
+            $("coreStatus").textContent = active ? "ONLINE" : "STANDBY";
+            $("powerBtn").textContent = active ? "POWER OFF" : "POWER ON";
+
+            if (active) {
+                respond("JARVIS พร้อมใช้งานแล้ว มีอะไรให้ช่วยครับ");
+            } else {
+                stopListening();
+                waitingForRpsChoice = false;
+                if ("speechSynthesis" in window) speechSynthesis.cancel();
+                respond("JARVIS entering standby mode.", false);
+            }
+        }
+
+        function executeCommand() {
+            const input = $("cmd");
+            const original = input.value.trim();
+            const cmd = original.toLowerCase();
+
+            if (!original) return;
+
+            writeLog("YOU: " + original);
+            input.value = "";
+
+            if (!active) {
+                respond("กรุณากด POWER ON ก่อนเริ่มใช้งาน", false);
+                return;
+            }
+
+            if (/^(เป่ายิงฉุบ|เป่ายิงชุบ|เล่นเป่ายิงฉุบ|rock paper scissors)$/.test(cmd)) {
+                startRockPaperScissors();
+                return;
+            }
+
+            if (/^(เริ่มจับเวลา|เริ่มนาฬิกาจับเวลา|เริ่มจับเวลาแบบนับขึ้น|start stopwatch)$/.test(cmd)) {
+                startStopwatch();
+                return;
+            }
+
+            if (/^(หยุดจับเวลา|หยุดนาฬิกาจับเวลา|พักจับเวลา|stop stopwatch|pause stopwatch)$/.test(cmd)) {
+                stopStopwatch();
+                return;
+            }
+
+            if (/^(รีเซ็ตจับเวลา|รีเซ็ตนาฬิกาจับเวลา|ล้างจับเวลา|reset stopwatch)$/.test(cmd)) {
+                resetStopwatch();
+                return;
+            }
+
+            if (/^(สุ่มเมนู|สุ่มเมนูอาหาร|สุ่มอาหาร|เมนูอาหารตามสั่ง|สุ่มเมนูอาหารตามสั่ง)$/.test(cmd)) {
+                randomMenu();
+                return;
+            }
+
+            if (/^(สุ่มมุกตลก|มุกตลก|เล่ามุกตลก|สุ่มมุก|tell me a joke)$/.test(cmd)) {
+                randomJoke();
+                return;
+            }
+
+            if (waitingForRpsChoice) {
+                const choice = getRpsChoice(cmd);
+                if (choice) {
+                    playRockPaperScissors(choice);
+                    return;
+                }
+            }
+
+            // Greeting
+            if (/^(hello|hi|hey)\b/.test(cmd) ||
+                /สวัสดี|หวัดดี/.test(cmd)) {
+                respond("สวัสดีครับ JARVIS พร้อมช่วยเหลือคุณ");
+                return;
+            }
+
+            // Help
+            if (/^(help|ช่วยเหลือ|คำสั่ง|คำสั่งทั้งหมด)$/.test(cmd)) {
+                respond(
+                    "คำสั่งที่ใช้ได้: เวลา, วันที่, สถานะ, เปิด Google, " +
+                    "เปิด YouTube, ค้นหา ตามด้วยคำค้น, สถานที่ใกล้ฉัน, อากาศ, " +
+                    "หรือระบุประเภท เช่น วัด ร้านอาหาร ร้านเหล้า รถไฟฟ้า ห้าง " +
+                    "สวนสาธารณะ โรงเรียน โรงแรม และร้านขนม ตามด้วยใกล้ฉัน, " +
+                    "เป่ายิงฉุบ แล้วเลือกค้อน กรรไกร หรือกระดาษ, " +
+                    "เริ่มจับเวลา, หยุดจับเวลา, รีเซ็ตจับเวลา, " +
+                    "สุ่มเมนูอาหารตามสั่ง และสุ่มมุกตลก, " +
+                    "คำนวณ ตามด้วยโจทย์, ตั้งเวลา ตามด้วยจำนวนวินาที, " +
+                    "ยกเลิกเวลา และสวัสดี"
+                );
+                return;
+            }
+
+            const nearbyPlaceType = getNearbyPlaceType(original);
+            if (nearbyPlaceType) {
+                searchNearbyPlaces(nearbyPlaceType);
+                return;
+            }
+
+            // Time and date
+            if (/เวลา|กี่โมง|what time/.test(cmd)) {
+                respond("ขณะนี้เวลา " +
+                    new Date().toLocaleTimeString("th-TH"));
+                return;
+            }
+
+            if (/วันที่|วันนี้วันอะไร|what date/.test(cmd)) {
+                respond("วันนี้วันที่ " +
+                    new Date().toLocaleDateString("th-TH", {
+                        dateStyle: "full"
+                    }));
+                return;
+            }
+
+            // System status
+            if (/สถานะ|system status/.test(cmd)) {
+                respond(
+                    "ระบบออนไลน์ หน้าจอพร้อมใช้งาน " +
+                    (recognition ? "โมดูลเสียงกำลังทำงาน" : "พร้อมรับคำสั่ง")
+                );
+                return;
+            }
+
+            // Open websites
+            if (/^(เปิด\s*)?(google|กูเกิล)$/.test(cmd)) {
+                openWebsite("https://www.google.com");
+                respond("กำลังเปิด Google");
+                return;
+            }
+
+            if (/^(เปิด\s*)?(youtube|ยูทูบ|ยูทิวบ์)$/.test(cmd)) {
+                openWebsite("https://www.youtube.com");
+                respond("กำลังเปิด YouTube");
+                return;
+            }
+
+            // Web search
+            const searchMatch = original.match(
+                /^(?:ค้นหา|search(?:\s+for)?|หา)\s+(.+)$/i
+            );
+
+            if (searchMatch) {
+                const query = searchMatch[1].trim();
+                if (!query) {
+                    respond("กรุณาระบุคำที่ต้องการค้นหา");
+                    return;
+                }
+
+                openWebsite(
+                    "https://www.google.com/search?q=" +
+                    encodeURIComponent(query)
+                );
+                respond("กำลังค้นหา " + query);
+                return;
+            }
+
+            // Weather search: opens current weather results.
+            if (/อากาศ|สภาพอากาศ|weather/.test(cmd)) {
+                const place = original
+                    .replace(/^(ขอดู|ดู|เช็ก|เช็ค)?\s*(สภาพอากาศ|อากาศ|weather)\s*/i, "")
+                    .trim();
+
+                const query = "สภาพอากาศ " + (place || "");
+                openWebsite(
+                    "https://www.google.com/search?q=" +
+                    encodeURIComponent(query)
+                );
+                respond("กำลังค้นหาข้อมูลสภาพอากาศ");
+                return;
+            }
+
+            // Timer: ตั้งเวลา 30 วินาที / timer 30
+            const timerMatch = cmd.match(
+                /^(?:ตั้งเวลา|จับเวลา|timer)\s*(\d+(?:\.\d+)?)\s*(วินาที|วินาที|second|seconds|s|นาที|นาที|minute|minutes|min|m)?$/
+            );
+
+            if (timerMatch) {
+                const amount = Number(timerMatch[1]);
+                const unit = timerMatch[2] || "วินาที";
+                const seconds = /นาที|minute|min|^m$/i.test(unit)
+                    ? amount * 60
+                    : amount;
+
+                if (!Number.isFinite(seconds) || seconds <= 0 ||
+                    seconds > 86400) {
+                    respond("ตั้งเวลาได้ตั้งแต่ 1 วินาทีถึง 24 ชั่วโมง");
+                    return;
+                }
+
+                startTimer(seconds);
+                return;
+            }
+
+            if (/^(ยกเลิกเวลา|หยุดเวลา|cancel timer|stop timer)$/.test(cmd)) {
+                stopTimer();
+                respond("ยกเลิกตัวจับเวลาแล้ว");
+                return;
+            }
+
+            // Safe basic arithmetic: only allow mathematical characters.
+            const mathMatch = original.match(
+                /^(?:คำนวณ|calculate|calc)\s+(.+)$/i
+            );
+
+            if (mathMatch) {
+                const expression = mathMatch[1].trim();
+
+                if (!/^[\d+\-*/().%\s]+$/.test(expression) ||
+                    !/\d/.test(expression)) {
+                    respond("กรุณาใส่โจทย์คณิตศาสตร์ เช่น คำนวณ 25 * 4");
+                    return;
+                }
+
+                try {
+                    // The character whitelist above excludes names, properties
+                    // and executable statements.
+                    const result = Function(
+                        '"use strict"; return (' + expression + ')'
+                    )();
+
+                    if (typeof result !== "number" || !Number.isFinite(result)) {
+                        respond("ไม่สามารถคำนวณโจทย์นี้ได้");
+                    } else {
+                        respond("ผลลัพธ์เท่ากับ " + result);
+                    }
+                } catch (_) {
+                    respond("รูปแบบโจทย์ไม่ถูกต้อง");
+                }
+                return;
+            }
+
+            // Unknown command
+            respond(
+                "ยังไม่รู้จักคำสั่งนี้ครับ พิมพ์ help เพื่อดูรายการคำสั่ง " +
+                "ระบบนี้ยังไม่ได้เชื่อมต่อ AI ChatGPT"
+            );
+        }
+
+        function openWebsite(url) {
+            // Open only explicit, predefined HTTPS destinations or search URLs.
+            const win = window.open(url, "_blank", "noopener,noreferrer");
+
+            if (!win) {
+                writeLog("JARVIS: เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups");
+            }
+        }
+
+        function startRockPaperScissors() {
+            if (!active) {
+                respond("กรุณากด POWER ON ก่อนเล่นเป่ายิงฉุบ", false);
+                return;
+            }
+
+            waitingForRpsChoice = true;
+            respond("มาเล่นเป่ายิงฉุบกันครับ เลือกค้อน กรรไกร หรือกระดาษ");
+        }
+
+        function getRpsChoice(command) {
+            const choice = command
+                .replace(/^(?:ฉันออก|ฉันเลือก|ผมออก|เราออก|ออก|ขอเลือก)\s*/, "")
+                .replace(/(?:ครับผม|ครับ|ค่ะ|คะ)$/, "")
+                .trim();
+
+            if (/^(ค้อน|rock)$/.test(choice)) return "ค้อน";
+            if (/^(กรรไกร|scissors?)$/.test(choice)) return "กรรไกร";
+            if (/^(กระดาษ|paper)$/.test(choice)) return "กระดาษ";
+            return null;
+        }
+
+        function playRockPaperScissors(playerChoice) {
+            const choices = ["ค้อน", "กรรไกร", "กระดาษ"];
+            const jarvisChoice = choices[
+                Math.floor(Math.random() * choices.length)
+            ];
+            const beats = {
+                "ค้อน": "กรรไกร",
+                "กรรไกร": "กระดาษ",
+                "กระดาษ": "ค้อน"
+            };
+            waitingForRpsChoice = false;
+
+            if (playerChoice === jarvisChoice) {
+                respond("คุณออก" + playerChoice + " JARVIS ออก" +
+                    jarvisChoice + " เสมอกันครับ เล่นอีกครั้งพูดว่าเป่ายิงฉุบ");
+            } else if (beats[playerChoice] === jarvisChoice) {
+                respond("คุณออก" + playerChoice + " JARVIS ออก" +
+                    jarvisChoice + " คุณชนะครับ เล่นอีกครั้งพูดว่าเป่ายิงฉุบ");
+            } else {
+                respond("คุณออก" + playerChoice + " JARVIS ออก" +
+                    jarvisChoice + " JARVIS ชนะครับ เล่นอีกครั้งพูดว่าเป่ายิงฉุบ");
+            }
+        }
+
+        function getNearbyPlaceType(command) {
+            const normalized = command.trim().toLowerCase();
+            const suffixMatch = normalized.match(
+                /(?:ใกล้(?:ๆ)?ฉัน|ใกล้เรา|แถวนี้|near me)$/
+            );
+            if (!suffixMatch) return null;
+
+            const placeName = normalized
+                .slice(0, suffixMatch.index)
+                .replace(/^(?:ค้นหา|หา)\s*/, "")
+                .replace(/\s+/g, "");
+
+            const placeTypes = [
+                { query: "วัด", aliases: ["วัด", "temple", "temples"] },
+                { query: "ร้านอาหาร", aliases: ["ร้านอาหาร", "ร้านกินข้าว", "อาหาร", "restaurant", "restaurants"] },
+                { query: "ร้านเหล้า", aliases: ["ร้านเหล้า", "ผับ", "บาร์", "pub", "bar"] },
+                { query: "สถานีรถไฟฟ้า", aliases: ["รถไฟฟ้า", "สถานีรถไฟฟ้า", "สถานีbts", "สถานีรถไฟใต้ดิน", "bts", "mrt"] },
+                { query: "ห้างสรรพสินค้า", aliases: ["ห้าง", "ห้างสรรพสินค้า", "shoppingmall", "mall"] },
+                { query: "สวนสาธารณะ", aliases: ["สวน", "สวนสาธารณะ", "park", "parks"] },
+                { query: "โรงเรียน", aliases: ["โรงเรียน", "school", "schools"] },
+                { query: "โรงแรม", aliases: ["โรงแรม", "ที่พัก", "hotel", "hotels"] },
+                { query: "ร้านขนม", aliases: ["ร้านขนม", "ร้านของหวาน", "ขนม", "dessert", "desserts"] },
+                { query: "สถานที่", aliases: ["", "สถานที่", "places", "place"] }
+            ];
+
+            const placeType = placeTypes.find(type =>
+                type.aliases.includes(placeName)
+            );
+            return placeType ? placeType.query : null;
+        }
+
+        function searchNearbyPlaces(placeType = "สถานที่") {
+            if (!active) {
+                respond("กรุณากด POWER ON ก่อนค้นหาสถานที่ใกล้ฉัน", false);
+                return;
+            }
+
+            if (!window.isSecureContext) {
+                respond("การระบุตำแหน่งต้องเปิดเว็บผ่าน HTTPS หรือ localhost", false);
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                respond("เบราว์เซอร์นี้ไม่รองรับการระบุตำแหน่ง", false);
+                return;
+            }
+
+            const mapWindow = window.open("about:blank", "_blank");
+            if (!mapWindow) {
+                respond("เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups แล้วลองอีกครั้ง", false);
+                return;
+            }
+            mapWindow.opener = null;
+
+            respond("กำลังขอตำแหน่งเพื่อค้นหา" + placeType +
+                "ใกล้คุณใน Google Maps พิกัดของคุณจะถูกส่งไปยัง Google");
+
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const { latitude, longitude } = position.coords;
+                    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+                        latitude < -90 || latitude > 90 ||
+                        longitude < -180 || longitude > 180) {
+                        mapWindow.close();
+                        respond("ได้รับข้อมูลตำแหน่งที่ไม่ถูกต้อง กรุณาลองอีกครั้ง", false);
+                        return;
+                    }
+
+                    mapWindow.location.replace(
+                        "https://www.google.com/maps/search/" +
+                        encodeURIComponent(placeType) + "/@" +
+                        latitude + "," + longitude + ",15z"
+                    );
+                    respond("กำลังเปิดผลค้นหา" + placeType +
+                        "ใกล้ตำแหน่งของคุณ");
+                },
+                error => {
+                    mapWindow.close();
+
+                    if (error.code === error.PERMISSION_DENIED) {
+                        respond("ไม่ได้รับอนุญาตให้เข้าถึงตำแหน่ง กรุณาอนุญาต Location ในเบราว์เซอร์แล้วลองอีกครั้ง", false);
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        respond("ไม่สามารถระบุตำแหน่งของคุณได้ กรุณาลองอีกครั้ง", false);
+                    } else if (error.code === error.TIMEOUT) {
+                        respond("หมดเวลารอตำแหน่ง กรุณาลองอีกครั้ง", false);
+                    } else {
+                        respond("เกิดข้อผิดพลาดขณะระบุตำแหน่ง กรุณาลองอีกครั้ง", false);
+                    }
+                },
+                { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+            );
+        }
+
+        function startTimer(seconds) {
+            stopTimer(false);
+
+            timerRemaining = Math.ceil(seconds);
+            timerEnd = Date.now() + seconds * 1000;
+
+            respond("เริ่มจับเวลา " + timerRemaining + " วินาทีแล้ว");
+
+            timerId = window.setInterval(() => {
+                timerRemaining = Math.max(
+                    0,
+                    Math.ceil((timerEnd - Date.now()) / 1000)
+                );
+
+                if (timerRemaining <= 0) {
+                    stopTimer(false);
+                    respond("หมดเวลาแล้วครับ");
+                }
+            }, 250);
+        }
+
+        function stopTimer(announce = false) {
+            if (timerId !== null) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+
+            timerRemaining = 0;
+            timerEnd = 0;
+
+            if (announce) respond("หยุดตัวจับเวลาแล้ว");
+        }
+
+        function updateStopwatchDisplay() {
+            const elapsed = stopwatchElapsed +
+                (stopwatchIntervalId === null
+                    ? 0
+                    : Date.now() - stopwatchStartTime);
+            const tenths = Math.floor(elapsed / 100) % 10;
+            const totalSeconds = Math.floor(elapsed / 1000);
+            const seconds = totalSeconds % 60;
+            const minutes = Math.floor(totalSeconds / 60) % 60;
+            const hours = Math.floor(totalSeconds / 3600);
+            const twoDigits = value => String(value).padStart(2, "0");
+            const time = hours > 0
+                ? hours + ":" + twoDigits(minutes) + ":" + twoDigits(seconds)
+                : twoDigits(minutes) + ":" + twoDigits(seconds);
+
+            const display = $("stopwatchDisplay");
+            if (display) {
+                display.textContent = time + "." + tenths;
+            }
+
+            const stopwatchButton = $("stopwatchBtn");
+            if (stopwatchButton) {
+                stopwatchButton.textContent =
+                    stopwatchIntervalId === null ? "START STOPWATCH" : "STOP STOPWATCH";
+            }
+        }
+
+        function startStopwatch() {
+            if (stopwatchIntervalId !== null) {
+                respond("นาฬิกาจับเวลากำลังทำงานอยู่แล้ว");
+                return;
+            }
+
+            stopwatchStartTime = Date.now();
+            stopwatchIntervalId = window.setInterval(
+                updateStopwatchDisplay,
+                100
+            );
+            updateStopwatchDisplay();
+            respond("เริ่มนาฬิกาจับเวลาแล้ว");
+        }
+
+        function stopStopwatch() {
+            if (stopwatchIntervalId === null) {
+                respond("นาฬิกาจับเวลาหยุดอยู่แล้ว");
+                return;
+            }
+
+            stopwatchElapsed += Date.now() - stopwatchStartTime;
+            clearInterval(stopwatchIntervalId);
+            stopwatchIntervalId = null;
+            updateStopwatchDisplay();
+            respond("หยุดนาฬิกาจับเวลาแล้ว เวลา " +
+                $("stopwatchDisplay").textContent);
+        }
+
+        function toggleStopwatch() {
+            if (stopwatchIntervalId === null) {
+                startStopwatch();
+            } else {
+                stopStopwatch();
+            }
+        }
+
+        function resetStopwatch() {
+            if (stopwatchIntervalId !== null) {
+                clearInterval(stopwatchIntervalId);
+                stopwatchIntervalId = null;
+            }
+            stopwatchElapsed = 0;
+            stopwatchStartTime = 0;
+            updateStopwatchDisplay();
+            respond("รีเซ็ตนาฬิกาจับเวลาแล้ว");
+        }
+
+        function stopListening() {
+            if (recognition) {
+                try {
+                    recognition.abort();
+                } catch (_) { }
+                recognition = null;
+            }
+
+            $("voiceStatus").textContent = "READY";
+        }
+
+        function listen() {
+            if (!active) {
+                respond("กรุณาเปิดระบบก่อนใช้งานเสียง", false);
+                return;
+            }
+
+            const SpeechRecognition =
+                window.SpeechRecognition ||
+                window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                respond(
+                    "เบราว์เซอร์นี้ไม่รองรับการรู้จำเสียง กรุณาลอง Chrome",
+                    false
+                );
+                return;
+            }
+
+            if (recognition) {
+                stopListening();
+                respond("หยุดฟังเสียงแล้ว", false);
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = "th-TH";
+            recognition.interimResults = false;
+            recognition.continuous = false;
+            recognition.maxAlternatives = 1;
+
+            const currentRecognition = recognition;
+
+            currentRecognition.onstart = () => {
+                $("voiceStatus").textContent = "LISTENING";
+                writeLog("JARVIS: กำลังฟัง พูดคำสั่งได้เลย...");
+            };
+
+            currentRecognition.onresult = event => {
+                const transcript = event.results[0][0].transcript;
+                $("cmd").value = transcript;
+                executeCommand();
+            };
+
+            currentRecognition.onerror = event => {
+                if (event.error !== "aborted") {
+                    writeLog("JARVIS: Voice error - " + event.error);
+                }
+            };
+
+            currentRecognition.onend = () => {
+                if (recognition === currentRecognition) {
+                    recognition = null;
+                }
+                $("voiceStatus").textContent = "READY";
+            };
+
+            try {
+                currentRecognition.start();
+            } catch (_) {
+                recognition = null;
+                $("voiceStatus").textContent = "READY";
+                respond("ไม่สามารถเริ่มระบบเสียงได้ กรุณาลองอีกครั้ง", false);
+            }
+        }
+
+        function clearLog() {
+            log.textContent = "JARVIS: Terminal cleared.";
+
+            try {
+                localStorage.setItem("jarvis-log", log.textContent);
+            } catch (_) { }
+        }
+
+        // Enter to execute.
+        $("cmd").addEventListener("keydown", event => {
+            if (event.key === "Enter") executeCommand();
+        });
+
+        // Restore previous terminal history.
+        try {
+            const savedLog = localStorage.getItem("jarvis-log");
+            if (savedLog) log.textContent = savedLog;
+        } catch (_) { }
+
+        // Live clock.
+        function updateClock() {
+            $("clock").textContent =
+                new Date().toLocaleTimeString("en-GB");
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+        updateStopwatchDisplay();
+
+        const madeToOrderMenus = [
+            "ข้าวกะเพราหมูสับไข่ดาว",
+            "ข้าวกะเพราไก่ไข่เจียว",
+            "ข้าวผัดหมู",
+            "ข้าวผัดกุ้ง",
+            "ข้าวผัดปู",
+            "ผัดซีอิ๊วหมู",
+            "ราดหน้าหมู",
+            "ผัดไทยกุ้งสด",
+            "ข้าวไข่เจียวหมูสับ",
+            "ข้าวคะน้าหมูกรอบ",
+            "ข้าวหมูกระเทียม",
+            "ข้าวไก่กระเทียม",
+            "ข้าวผัดพริกแกงหมู",
+            "ข้าวผัดพริกแกงไก่",
+            "ข้าวผัดพริกเผาทะเล",
+            "ข้าวผัดต้มยำกุ้ง",
+            "ข้าวกะเพราหมูกรอบ",
+            "ข้าวกะเพราเนื้อ",
+            "ข้าวผัดแหนม",
+            "ข้าวผัดอเมริกัน",
+            "มาม่าผัดขี้เมาทะเล",
+            "สุกี้น้ำไก่",
+            "สุกี้แห้งทะเล",
+            "ข้าวผัดปลากระป๋อง",
+            "ข้าวหมูหวานไข่ดาว",
+            "ข้าวผัดเขียวหวานไก่",
+            "ข้าวผัดฉ่าทะเล",
+            "ข้าวผัดกุนเชียง",
+            "ข้าวผัดพริกอ่อนหมู",
+            "ข้าวผัดผงกะหรี่ไก่"
+        ];
+
+        function randomMenu() {
+            const menu = madeToOrderMenus[
+                Math.floor(Math.random() * madeToOrderMenus.length)
+            ];
+            respond("วันนี้กิน " + menu + " ดีไหมครับ");
+        }
+
+        const jokes = [
+            "ทำไมคอมพิวเตอร์ถึงหนาว เพราะเปิดวินโดวส์ทิ้งไว้",
+            "ปลาอะไรไม่มีสัมมาคารวะ ปลาตีน เพราะชอบเดินลุย",
+            "ทำไมดินสอถึงไม่เคยหลงทาง เพราะมีไส้เป็นเข็มทิศ",
+            "อะไรเอ่ยยิ่งตัดยิ่งยาว ถนนไงล่ะ",
+            "ทำไมหนังสือคณิตศาสตร์ถึงเศร้า เพราะมีแต่ปัญหา",
+            "ไก่อะไรเอ่ยขันไม่เป็น ไก่ที่ยังไม่ตื่น",
+            "ทำไมนาฬิกาถึงมีแต่คนถาม เพราะมันมีเวลาให้",
+            "ร้านอะไรไม่ต้องมีประตู ร้านออนไลน์ไง",
+            "ทำไมผีไม่กินข้าว เพราะกลัวโดนจับได้ว่ากินของคน",
+            "อะไรเอ่ยมีฟันเยอะแต่กินไม่ได้ หวีไง",
+            "ทำไมรองเท้าถึงชอบไปเป็นคู่ เพราะไปคนเดียวแล้วหลง",
+            "อะไรเอ่ยยิ่งล้างยิ่งสกปรก น้ำในถังตอนล้างพื้น",
+            "ทำไมคอมพิวเตอร์ชอบไปทะเล เพราะอยากพักร้อนที่เว็บ",
+            "เลขอะไรชอบออกกำลังกาย เลขแปด เพราะนอนตะแคงก็ยังฟิต",
+            "ทำไมกาแฟถึงตอบข้อสอบเก่ง เพราะมีแต่คำตอบเข้ม ๆ",
+            "อะไรเอ่ยมีคอแต่ไม่มีหัว ขวดน้ำไง",
+            "ทำไมปลาถึงไม่ชอบเล่นอินเทอร์เน็ต กลัวโดนตกเบ็ดออนไลน์",
+            "ขนมอะไรชอบพูดความจริง ขนมปัง เพราะไม่เคยโกหกไส้",
+            "ทำไมประตูถึงไม่เถียงใคร เพราะเปิดใจรับฟังเสมอ",
+            "อะไรเอ่ยเดินทั้งวันแต่ไม่ไปไหน นาฬิกาไง",
+            "ทำไมหมอนถึงเป็นเพื่อนที่ดี เพราะรับฟังทุกเรื่องก่อนนอน",
+            "ผักอะไรชอบร้องเพลง คะน้า เพราะคะน้าร้องเพลงเพราะ",
+            "ทำไมแมวถึงใช้คอมพิวเตอร์เก่ง เพราะคลิกเมาส์คล่อง",
+            "อะไรเอ่ยมีตาแต่ไม่เห็น เข็มไง",
+            "ทำไมข้าวเหนียวถึงไม่ไปไหน เพราะติดเพื่อน",
+            "ทำไมแผนที่ถึงไม่เครียด เพราะหาทางออกได้เสมอ",
+            "อะไรเอ่ยยิ่งปล่อยยิ่งเบา ลูกโป่งไง ปล่อยลมออกแล้วก็เบาลง",
+            "ทำไมช้อนถึงไม่ชอบทะเลาะ เพราะไม่อยากคนละช้อน",
+            "ทำไมตู้เย็นถึงเป็นคนใจเย็น เพราะโดนแช่มาตลอด",
+            "อะไรเอ่ยพูดได้ทุกภาษา ป้ายบอกทาง เพราะทุกคนอ่านแล้วเข้าใจ"
+        ];
+
+        function randomJoke() {
+            const joke = jokes[Math.floor(Math.random() * jokes.length)];
+            respond(joke);
+        }
+
+        const flirtLines = [
+            "เธอชื่ออะไรครับ หรือให้เราเรียกว่าที่รักดี",
+            "ปกติไม่ค่อยชอบมองใครนะ แต่เธอนี่ข้อยกเว้น",
+            "เธอเป็น Wi-Fi เหรอ ทำไมเราอยากเชื่อมต่อด้วยจัง",
+            "ไม่ได้เป็นคนขี้อ่อย แค่เห็นเธอแล้วใจมันทำงานเกินหน้าที่",
+            "เธอมีแผนที่ไหม เราหลงทางอยู่ในสายตาเธอ",
+            "ถ้าเธอเป็นข้อสอบ เราคงยอมอ่านหนังสือทั้งคืน",
+            "เธอเป็นกาแฟเหรอ ทำไมทำให้เราตาสว่าง",
+            "ไม่ได้อยากเป็นคนสำคัญของใคร แต่อยากเป็นคนสำคัญของเธอ",
+            "เธอชอบคนแบบไหน แบบเราพอไหวไหม",
+            "ขอยืมรอยยิ้มหน่อยได้ไหม จะเอาไปเป็นกำลังใจทั้งวัน",
+            "ถ้าเธอเป็นดาว เราคงไม่อยากกลับบ้าน เพราะอยากมองทั้งคืน",
+            "เราไม่เก่งคณิตศาสตร์ แต่รู้ว่าเรากับเธอน่าจะบวกกันได้",
+            "เธอเป็น Bluetooth หรือเปล่า อยู่ใกล้แล้วใจเรา Pair เอง",
+            "ขอถามอะไรหน่อยได้ไหม ทำไมน่ารักได้ขนาดนี้",
+            "ไม่ได้อยากได้ดอกไม้ แค่อยากได้โอกาสรู้จักเธอ",
+            "ถ้าความน่ารักมีภาษี เธอคงต้องจ่ายย้อนหลังแล้วนะ",
+            "วันนี้อากาศดีนะ แต่ถ้าได้คุยกับเธอคงดีกว่า",
+            "เราไม่ได้มองคนที่หน้าตาอย่างเดียว แต่เธอก็หน้าตาดีด้วย",
+            "เธอทำงานอะไรครับ ทำไมทำให้ใจเราทำงานหนักจัง",
+            "ขอเป็นเหตุผลเล็ก ๆ ที่ทำให้เธอยิ้มได้ไหม",
+            "ถ้าเธอเหนื่อยกับการเป็นคนน่ารัก พักมาเป็นคนของเราก็ได้",
+            "เราไม่ใช่ช่างไฟ แต่เห็นเธอแล้วใจมันช็อต",
+            "เธอเป็นวันหยุดหรือเปล่า แค่คิดถึงก็รู้สึกดีแล้ว",
+            "ไม่รู้ว่าเธอชอบคนตลกไหม แต่เราอยากเป็นคนที่ทำให้เธอยิ้ม",
+            "เธอเชื่อเรื่องพรหมลิขิตไหม หรือให้เราลองทักไปพิสูจน์",
+            "ขอไลน์ไม่ได้เหรอ งั้นขอเป็นคนในใจแทนได้ไหม",
+            "เธอไม่ได้ทำอะไรผิดนะ แต่ทำไมขโมยความสนใจเราไปหมดเลย",
+            "ถ้าเธอชอบคนจริงใจ เราขอสมัครเป็นตัวเลือกได้ไหม",
+            "เราไม่รู้ว่าอนาคตจะเป็นยังไง แต่ตอนนี้อยากรู้จักเธอมากขึ้น",
+            "JARVIS ตรวจพบความผิดปกติครับ หัวใจเจ้านายเต้นแรงเมื่ออยู่ใกล้คุณ"
+        ];
+
+        function randomFlirt() {
+            const line = flirtLines[
+                Math.floor(Math.random() * flirtLines.length)
+            ];
+
+            // แสดงมุกใน Terminal
+            writeLog("JARVIS: " + line);
+
+            // อ่านมุกออกเสียงภาษาไทย
+            if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(line);
+                utterance.lang = "th-TH";
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                utterance.volume = 1;
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                writeLog("JARVIS: เบราว์เซอร์ไม่รองรับระบบเสียง");
+            }
+        }
+
+        function flirtMode() {
+            if (!active) {
+                writeLog("JARVIS: กรุณากด POWER ON ก่อนใช้งาน");
+                return;
+            }
+
+            respond("เปิดโหมดจีบสาวแล้วครับเจ้านาย");
+            randomFlirt();
+        }
+
+
+
+        // Playful roast mode: random Thai one-liners with spoken output.
+        const insults = [
+            "ไอ้เหี้ย",
+            "ไอ้สัส",
+            "ไอ้ควาย",
+            "โง่ชิบหาย",
+            "กากชิบหาย",
+            "ไอ้เวร",
+            "ไอ้ระยำ",
+            "ไอ้หน้าหมา",
+            "ไอ้ส้นตีน",
+            "ไอ้จัญไร",
+            "ไอ้ชาติหมา",
+            "ไอ้ปากหมา",
+            "ไอ้ขี้แพ้",
+            "ไอ้บัดซบ",
+            "แม่งเอ๊ย",
+            "ไอ้ห่า",
+            "ไอ้หน้าหี",
+            "ไอ้ขี้ตีน",
+            "ไอ้ตัวซวย",
+            "ไอ้โง่เอ๊ย",
+            "มึงนี่กากจริง",
+            "สมองมีไว้คั่นหูเหรอ",
+            "คิดได้แค่นี้เหรอวะ",
+            "ไอ้ตัวปัญหา",
+            "พูดอะไรโง่ ๆ",
+            "ไอ้ขี้โม้",
+            "มึงนี่มันสุดจริง",
+            "ปัญญาทึบชิบหาย",
+            "ไอ้เวรตะไล",
+            "ไอ้ควายเรียกพี่"
+        ];
+
+        function jarvisInsult() {
+            if (!active) {
+                respond("กรุณากด POWER ON ก่อนใช้งาน ROAST MODE", false);
+                return;
+            }
+            const line = insults[Math.floor(Math.random() * insults.length)];
+            respond(line);
+        }
+
+    </script>
+</body>
+
+</html>
