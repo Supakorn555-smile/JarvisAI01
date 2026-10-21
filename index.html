@@ -247,6 +247,11 @@
             white-space: pre-wrap;
         }
 
+        #log a {
+            color: var(--cyan);
+            text-decoration: underline;
+        }
+
         .command {
             display: flex;
             gap: 10px;
@@ -425,9 +430,18 @@
             "JARVIS: Awaiting user command..."
         ];
 
-        function writeLog(message) {
+        function writeLog(message, link) {
             const line = document.createTextNode("\n" + message);
             log.appendChild(line);
+            if (link) {
+                const anchor = document.createElement("a");
+                anchor.href = link.url;
+                anchor.target = "_blank";
+                anchor.rel = "noopener noreferrer";
+                anchor.textContent = link.text;
+                log.appendChild(document.createTextNode(" "));
+                log.appendChild(anchor);
+            }
             log.scrollTop = log.scrollHeight;
 
             // Keep the latest 100 lines.
@@ -441,8 +455,8 @@
             } catch (_) { }
         }
 
-        function respond(message, speak = true) {
-            writeLog("JARVIS: " + message);
+        function respond(message, speak = true, link) {
+            writeLog("JARVIS: " + message, link);
 
             if (speak && active && "speechSynthesis" in window) {
                 speechSynthesis.cancel();
@@ -801,13 +815,6 @@
                 return;
             }
 
-            const mapWindow = window.open("about:blank", "_blank");
-            if (!mapWindow) {
-                respond("เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups แล้วลองอีกครั้ง", false);
-                return;
-            }
-            mapWindow.opener = null;
-
             respond("กำลังขอตำแหน่งเพื่อค้นหา" + placeType +
                 "ใกล้คุณใน Google Maps พิกัดของคุณจะถูกส่งไปยัง Google");
 
@@ -817,22 +824,28 @@
                     if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
                         latitude < -90 || latitude > 90 ||
                         longitude < -180 || longitude > 180) {
-                        mapWindow.close();
                         respond("ได้รับข้อมูลตำแหน่งที่ไม่ถูกต้อง กรุณาลองอีกครั้ง", false);
                         return;
                     }
 
-                    mapWindow.location.replace(
-                        "https://www.google.com/maps/search/" +
-                        encodeURIComponent(placeType) + "/@" +
-                        latitude + "," + longitude + ",15z"
+                    const coordinates = latitude + "," + longitude;
+                    const mapUrl = new URL(
+                        "https://www.google.com/maps/search/"
                     );
-                    respond("กำลังเปิดผลค้นหา" + placeType +
-                        "ใกล้ตำแหน่งของคุณ");
+                    mapUrl.searchParams.set("api", "1");
+                    mapUrl.searchParams.set(
+                        "query",
+                        placeType + " near " + coordinates
+                    );
+                    mapUrl.searchParams.set("center", coordinates);
+                    respond(
+                        "พบลิงก์ค้นหา" + placeType +
+                        "ใกล้ตำแหน่งของคุณ แตะเพื่อเปิดในแอป Google Maps",
+                        false,
+                        { text: "เปิดในแอป Google Maps", url: mapUrl.href }
+                    );
                 },
                 error => {
-                    mapWindow.close();
-
                     if (error.code === error.PERMISSION_DENIED) {
                         respond("ไม่ได้รับอนุญาตให้เข้าถึงตำแหน่ง กรุณาอนุญาต Location ในเบราว์เซอร์แล้วลองอีกครั้ง", false);
                     } else if (error.code === error.POSITION_UNAVAILABLE) {
